@@ -8,6 +8,7 @@ import Register from './components/auth/Register';
 import NotFound from './components/shared/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import FetchUser from './components/auth/FetchUser';
+import Profile from './components/auth/Profile';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             {/* Protected (need to be logged in to see) */}
             <Route element={<ProtectedRoute />}>
               <Route path='/home' element={<HomeProtected />} />
+              <Route path ='/profile' element={<Profile />} />
             </Route>
           </Routes>
         </>
