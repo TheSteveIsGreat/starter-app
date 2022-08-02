@@ -1,70 +1,113 @@
-# Getting Started with Create React App
+This project has devise_token_auth, react_router, etc setup.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+uses rails v6, ruby 3.0.2
+more info about the project
+Getting starter (how to use)
+Clone
+git clone git@github.com:brendacassita/dpl-starter-project.git 'project-name'
+cd 'project-name'
+rails stuff
+renaming our database in the config/database.yml file
+bundle
+rails db:create db:migrate (db:seed if needed/applicable)
+rails s -p 3001
+react stuff
+make sure in client folder
 
-## Available Scripts
+yarn
+yarn start
+git stuff
+git remote rm origin
+create new repo on github
+git remote add origin
+Features/Explanation
+TOKENS
+token based auth
+when client log in server will check our creds and if valid gives us back a token (via response)
+when client make subsequent requests, needs to send token, if token is invalid server will responded 401 error. (unauthed)
+how do we do handle receiving token and sending token (backend): devise_token_auth: sending in response (frontend): devise-axios library (in index.js)
 
-In the project directory, you can run:
+import { initMiddleware } from 'devise-axios';
 
-### `yarn start`
+// this going to get token from api calls and set them to be sent on the
+// next api call, also stores info to localStorage,
+initMiddleware();
+AuthProvider
+gives a way to share this 'user' state( where user is authed user) and methods to login, logout, register.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+App.js
+      <FetchUser>
+        <>
+          <Routes>
+            {/* Unprotected */}
+            <Route path='/login' element={<Login />}/>
+            <Route path='/register' element={<Register />}/>
+            <Route path='/' element={<Home />}/>
+           
+                {/* protected in routes inside of here you need to logged in*/}
+                {/* else you go to login page*/}
+            <Route element={<ProtectedRoute />}>
+              <Route path='/home' element={<HomeClass yo={'yoyo'} />}/>
+            </Route>  
+            <Route path='*' element={<NoMatch />}/>
+          </Routes>
+        </>
+      </FetchUser>
+Three parts here
+FetchUser: Checks to see if there is a valid user, and prevent Routes from getting render until the check is done
+if fetchUser is in progress of Checking it looks like this
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+      <FetchUser>
+        {null}
+      </FetchUser>
+Unprotected routes routes you don't need to be logged in to see..
+   {/* Unprotected */}
+            <Route path='/login' element={<Login />}/>
+            <Route path='/register' element={<Register />}/>
+            <Route path='/' element={<Home />}/>
+Protected routes routes you do need to be logged in to see..
+    <Route element={<ProtectedRoute />}>
+        {/* Any Routes we throw in here, user needs to be logged in */}
+        <Route path='/home' element={<HomeClass yo={'yoyo'} />}/>
+    </Route>  
+    const ProtectedRoute = (props)=>{
+        // get user from Provider 
+        const auth = useContext(AuthContext)
+        // if we have auth.user render the route
+        // if not we can do something else, in this
+        // case we redirect to Login screen
+        return auth.user ? <Outlet /> : <Navigate to='/login'/>
+    }
+Backend
+add devise_token_auth to gem file
+rails g devise_token_auth:install User api/auth this command does a lot for us
+it adds the routes/controller stuff
+it create our model (in this case the user model)
+add extend Devise::Models to user.rb file
+added AddTrackableToUsers migration
+class AddTrackableToUsers < ActiveRecord::Migration[6.0]
+  def change
+      ## Trackable
+      add_column :users, :sign_in_count, :integer, :default => 0
+      add_column :users, :current_sign_in_at, :datetime
+      add_column :users, :last_sign_in_at, :datetime
+      add_column :users, :current_sign_in_ip, :string
+      add_column :users, :last_sign_in_ip, :string
+  end
+end
+routes
+we have all the routes defined and controller action setup for us...
 
-### `yarn test`
+Rails.application.routes.draw do
+  # generates all devise routes
+  mount_devise_token_auth_for 'User', at: 'api/auth'
+  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+end
+main features on backend
+we to protect routes on the backend before_action :authenticate_user!
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+way to get 'logged in user' on the backend current_user
