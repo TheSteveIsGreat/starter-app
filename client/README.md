@@ -2,7 +2,7 @@ This project has devise_token_auth, react_router, etc setup.
 - uses rails v6, ruby 3.0.2
 - more info about the project
 
-## Getting starter (how to use)
+## Getting started
 
 ## Clone
 1. git clone git@github.com:brendacassita/dpl-starter-project.git 'project-name'
@@ -158,16 +158,3 @@ end
 
  > way to  get 'logged in user' on the backend
   current_user
-
-
-
-Trina 
-Sharayah
-
-Trina
-
-
-Sharayah added:
- 1. yarn add axios styled-component framer-motion react-click-outside-hook react-icons react-spinners
- 
- sdkflsadklj
